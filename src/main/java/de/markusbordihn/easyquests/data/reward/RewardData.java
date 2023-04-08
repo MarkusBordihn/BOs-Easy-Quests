@@ -20,6 +20,7 @@
 package de.markusbordihn.easyquests.data.reward;
 
 import net.minecraft.commands.CommandFunction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 
 public class RewardData {
@@ -47,4 +48,10 @@ public class RewardData {
   public void setRewardType(RewardType rewardType) {
     this.rewardType = rewardType;
   }
+
+  public static RewardData load(CompoundTag compoundTag) {
+    return null;
+  }
+
+  public void save(CompoundTag compoundTag) {}
 }

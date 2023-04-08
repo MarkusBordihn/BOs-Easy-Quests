@@ -19,6 +19,14 @@
 
 package de.markusbordihn.easyquests.data.criteria;
 
+import net.minecraft.nbt.CompoundTag;
+
 public class CriteriaData {
+
+  public static CriteriaData load(CompoundTag compoundTag) {
+    return null;
+  }
+
+  public void save(CompoundTag compoundTag) {}
 
 }

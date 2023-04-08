@@ -19,6 +19,9 @@
 
 package de.markusbordihn.easyquests.commands;
 
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.logging.log4j.LogManager;
@@ -31,9 +34,12 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 
 import de.markusbordihn.easyquests.Constants;
+import de.markusbordihn.easyquests.data.quest.QuestDataManager;
+import de.markusbordihn.easyquests.data.quest.QuestManager;
 
 public class CustomCommand {
 
@@ -41,15 +47,47 @@ public class CustomCommand {
 
   protected CustomCommand() {}
 
-  protected static CompletableFuture<Suggestions> suggestQuest(
+  protected static CompletableFuture<Suggestions> suggestQuestId(
       CommandContext<CommandSourceStack> context, SuggestionsBuilder build)
       throws CommandSyntaxException {
     ServerPlayer serverPlayer = context.getSource().getPlayerOrException();
 
-    String[] test = {"a", "b", "c"};
+    ArrayList<ResourceLocation> questIds = new ArrayList<>();
+    QuestManager.getQuests().forEach(quest -> {
+      questIds.add(quest.getId());
+    });
 
     // Return all quests for creative mode and only the available of the player.
-    return SharedSuggestionProvider.suggest(test, build);
+    return SharedSuggestionProvider.suggestResource(questIds, build);
+  }
+
+  protected static CompletableFuture<Suggestions> suggestQuestTitle(
+      CommandContext<CommandSourceStack> context, SuggestionsBuilder build)
+      throws CommandSyntaxException {
+    ServerPlayer serverPlayer = context.getSource().getPlayerOrException();
+
+    ArrayList<String> questTitles = new ArrayList<>();
+    QuestManager.getQuests().forEach(quest -> {
+      questTitles.add('"' + quest.getTitle() + '"');
+    });
+
+    // Return all quests for creative mode and only the available of the player.
+    return SharedSuggestionProvider.suggest(questTitles, build);
+  }
+
+  protected static CompletableFuture<Suggestions> suggestQuestFile(
+      CommandContext<CommandSourceStack> context, SuggestionsBuilder build) {
+
+    // Format quest files for suggestion.
+    List<Path> questFiles = QuestDataManager.getQuestDataFiles();
+    ArrayList<String> questFilePaths = new ArrayList<>();
+    questFiles.forEach(questPath -> {
+      log.info(questPath);
+      questFilePaths.add('"' + questPath.toString().replace("\\","/") + '"');
+    });
+
+    // Return all quests for creative mode and only the available of the player.
+    return SharedSuggestionProvider.suggest(questFilePaths, build);
   }
 
 }

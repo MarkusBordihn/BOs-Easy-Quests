@@ -30,33 +30,32 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
 
 import de.markusbordihn.easyquests.data.quest.QuestData;
+import de.markusbordihn.easyquests.data.quest.QuestDataManager;
 import de.markusbordihn.easyquests.data.quest.QuestManager;
 
-public class ShowCommand extends CustomCommand {
+public class SaveCommand extends CustomCommand {
 
   public static final String ID_ARG = "id";
   public static final String TITLE_ARG = "title";
 
   public static ArgumentBuilder<CommandSourceStack, ?> register() {
 
-    return Commands.literal("show")
+    return Commands.literal("save")
         .requires(commandSourceStack -> commandSourceStack.hasPermission(2))
 
         // Show quest by title.
-        .then(Commands.argument(TITLE_ARG, StringArgumentType.string()).executes(ShowCommand::show))
+        .then(Commands.argument(TITLE_ARG, StringArgumentType.string()).executes(SaveCommand::save))
 
         // Show quest by id.
         .then(Commands.argument(ID_ARG, ResourceLocationArgument.id())
-            .suggests(ShowCommand::suggestQuestId).executes(ShowCommand::showById));
+            .suggests(SaveCommand::suggestQuestId).executes(SaveCommand::saveById));
   }
 
-  private static int show(CommandContext<CommandSourceStack> context)
+  private static int save(CommandContext<CommandSourceStack> context)
       throws CommandSyntaxException {
     CommandSourceStack source = context.getSource();
-    ServerPlayer player = source.getPlayerOrException();
 
     // Validate title and show error message if title is invalid.
     String title = StringArgumentType.getString(context, TITLE_ARG);
@@ -72,15 +71,15 @@ public class ShowCommand extends CustomCommand {
       return 0;
     }
 
-    source.sendSuccess(new TextComponent("Show quest with title: " + title + ":" + questData),
+    source.sendSuccess(new TextComponent("Save quest with title: " + title + ":" + questData),
         false);
+    QuestDataManager.saveQuestData(questData);
     return Command.SINGLE_SUCCESS;
   }
 
-  private static int showById(CommandContext<CommandSourceStack> context)
+  private static int saveById(CommandContext<CommandSourceStack> context)
       throws CommandSyntaxException {
     CommandSourceStack source = context.getSource();
-    ServerPlayer player = source.getPlayerOrException();
 
     // Verify resource id and show error message if id is invalid.
     ResourceLocation resourceLocation = ResourceLocationArgument.getId(context, ID_ARG);
@@ -97,7 +96,8 @@ public class ShowCommand extends CustomCommand {
     }
 
     source.sendSuccess(
-        new TextComponent("Show quest with id " + resourceLocation + ":" + questData), false);
+        new TextComponent("Save quest with id " + resourceLocation + ":" + questData), false);
+    QuestDataManager.saveQuestData(questData);
     return Command.SINGLE_SUCCESS;
   }
 
